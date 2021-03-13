@@ -32,10 +32,15 @@ def parse_book_page(page, baseurl='https://tululu.org/'):
     }
 
 
-def download_file(url, filename, folder=''):
+def get_response(url):
     response = requests.get(url, verify=False)
     response.raise_for_status()
     check_for_redirect(response)
+    return response
+
+
+def download_file(url, filename, folder=''):
+    response = get_response(url)
     filename = sanitize_filename(filename)
     filepath = Path(folder) / filename
     Path(filepath.parent).mkdir(parents=True, exist_ok=True)
@@ -71,10 +76,8 @@ def main():
         book_page_url = f'https://tululu.org/b{book_id}/'
         book_file_url = f'https://tululu.org/txt.php?id={book_id}'
         try:
-            book_page_response = requests.get(book_page_url, verify=False)
-            book_page_response.raise_for_status()
-            check_for_redirect(book_page_response)
-            parsed_book_page = parse_book_page(book_page_response.text)
+            book_page = get_response(book_page_url)
+            parsed_book_page = parse_book_page(book_page.text)
             book_name = parsed_book_page['title']
             book_file_name = f'{book_id}.{book_name}.txt'
             img_url = parsed_book_page['img_url']
