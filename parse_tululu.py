@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 import urllib3
 from urllib.parse import urljoin, urlsplit, unquote
@@ -49,9 +50,24 @@ def check_for_redirect(response):
             raise requests.HTTPError
 
 
+def create_parser():
+    parser = argparse.ArgumentParser(
+        description='Программа парсит книги с сайта tululu.org'
+    )
+    parser.add_argument('-s', '--start_id',
+                        help='Начальный индекс книги из диапазона',
+                        type=int, default=1)
+    parser.add_argument('-e', '--end_id',
+                        help='Конечный индекс книги из диапазона',
+                        type=int, default=10)
+    return parser
+
+
 def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    for book_id in range(1, 11):
+    parser = create_parser()
+    args = parser.parse_args()
+    for book_id in range(args.start_id, args.end_id + 1):
         book_page_url = f'https://tululu.org/b{book_id}/'
         book_file_url = f'https://tululu.org/txt.php?id={book_id}'
         try:
