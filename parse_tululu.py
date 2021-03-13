@@ -1,4 +1,5 @@
 from pathlib import Path
+import urllib3
 from urllib.parse import urljoin, urlsplit, unquote
 
 from bs4 import BeautifulSoup
@@ -49,6 +50,7 @@ def check_for_redirect(response):
 
 
 def main():
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     for book_id in range(1, 11):
         book_page_url = f'https://tululu.org/b{book_id}/'
         book_file_url = f'https://tululu.org/txt.php?id={book_id}'
