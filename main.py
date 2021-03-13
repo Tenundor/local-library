@@ -1,21 +1,32 @@
 from pathlib import Path
+from urllib.parse import urljoin, urlsplit, unquote
 
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 import requests
 
 
-def parse_book_page(page):
+def find_filename_in_url(file_url):
+    path = urlsplit(file_url)[2]
+    filename_start_index = path.rindex('/') + 1
+    filename = path[filename_start_index:]
+    return unquote(filename)
+
+
+def parse_book_page(page, baseurl='https://tululu.org/'):
     soup = BeautifulSoup(page, 'lxml')
     title_author_tag = soup.find('td', class_='ow_px_td').find('h1')
     title_author_text = title_author_tag.text.split('::')
+    relative_img_url = soup.find('div', class_='bookimage').find('img')['src']
     return {
         'title': title_author_text[0].strip(),
         'author': title_author_text[1].strip(),
+        'img_url': urljoin(baseurl, relative_img_url),
+        'img_filename': find_filename_in_url(relative_img_url)
     }
 
 
-def download_txt(url, filename, folder='books/'):
+def download_file(url, filename, folder=''):
     response = requests.get(url, verify=False)
     response.raise_for_status()
     check_for_redirect(response)
@@ -41,9 +52,15 @@ def main():
             book_page_response = requests.get(book_page_url, verify=False)
             book_page_response.raise_for_status()
             check_for_redirect(book_page_response)
-            book_name = parse_book_page(book_page_response.text)['title']
+            parsed_book_page = parse_book_page(book_page_response.text)
+            book_name = parsed_book_page['title']
             book_file_name = f'{book_id}.{book_name}.txt'
-            print(download_txt(book_file_url, book_file_name))
+            img_url = parsed_book_page['img_url']
+            img_filename = parsed_book_page['img_filename']
+            img_path = download_file(img_url, img_filename, 'images')
+            print(img_path)
+            # print(download_file(book_file_url, book_file_name, 'books'))
+
         except requests.HTTPError:
             continue
 
