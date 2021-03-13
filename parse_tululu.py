@@ -82,13 +82,10 @@ def main():
             book_file_name = f'{book_id}.{book_name}.txt'
             img_url = parsed_book_page['img_url']
             img_filename = parsed_book_page['img_filename']
-            genres = parsed_book_page['genres']
-            print(genres)
-            # for comment in parsed_book_page['comments']:
-            #     print(comment)
-            # img_path = download_file(img_url, img_filename, 'images')
-            # print(img_path)
-            # print(download_file(book_file_url, book_file_name, 'books'))
+            download_file(img_url, img_filename, 'images')
+            download_file(book_file_url, book_file_name, 'books')
+            print(f'Название: {book_name}')
+            print(f"Автор: {parsed_book_page['author']}", '\n')
 
         except requests.HTTPError:
             continue
