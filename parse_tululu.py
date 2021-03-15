@@ -84,9 +84,6 @@ def main():
             img_filename = parsed_book_page['img_filename']
             download_file(img_url, img_filename, folder='images')
             download_file(library_url, book_file_name, 'books', id=book_id)
-            print(f'Название: {book_name}')
-            print(f"Автор: {parsed_book_page['author']}", '\n')
-
         except requests.HTTPError:
             continue
 
