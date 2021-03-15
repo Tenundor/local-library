@@ -32,15 +32,15 @@ def parse_book_page(page, baseurl='https://tululu.org/'):
     }
 
 
-def get_response(url):
-    response = requests.get(url, verify=False)
+def get_response(url, **request_parameters):
+    response = requests.get(url, verify=False, params=request_parameters)
     response.raise_for_status()
     check_for_redirect(response)
     return response
 
 
-def download_file(url, filename, folder=''):
-    response = get_response(url)
+def download_file(url, filename, folder='', **request_parameters):
+    response = get_response(url, **request_parameters)
     filename = sanitize_filename(filename)
     filepath = Path(folder) / filename
     Path(filepath.parent).mkdir(parents=True, exist_ok=True)
@@ -72,9 +72,9 @@ def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     parser = create_parser()
     args = parser.parse_args()
+    library_url = 'https://tululu.org'
     for book_id in range(args.start_id, args.end_id + 1):
-        book_page_url = f'https://tululu.org/b{book_id}/'
-        book_file_url = f'https://tululu.org/txt.php?id={book_id}'
+        book_page_url = f'{library_url}/b{book_id}/'
         try:
             book_page = get_response(book_page_url)
             parsed_book_page = parse_book_page(book_page.text)
@@ -82,8 +82,8 @@ def main():
             book_file_name = f'{book_id}.{book_name}.txt'
             img_url = parsed_book_page['img_url']
             img_filename = parsed_book_page['img_filename']
-            download_file(img_url, img_filename, 'images')
-            download_file(book_file_url, book_file_name, 'books')
+            download_file(img_url, img_filename, folder='images')
+            download_file(library_url, book_file_name, 'books', id=book_id)
             print(f'Название: {book_name}')
             print(f"Автор: {parsed_book_page['author']}", '\n')
 
