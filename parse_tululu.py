@@ -33,7 +33,8 @@ def parse_book_page(page, baseurl='https://tululu.org/'):
 def get_response(url, **request_parameters):
     response = requests.get(url, verify=False, params=request_parameters)
     response.raise_for_status()
-    check_for_redirect(response)
+    if response.history:
+        raise requests.HTTPError
     return response
 
 
@@ -44,13 +45,6 @@ def download_file(url, filename, folder='', **request_parameters):
     Path(filepath.parent).mkdir(parents=True, exist_ok=True)
     filepath.write_bytes(response.content)
     return str(filepath)
-
-
-def check_for_redirect(response):
-    redirection_codes = range(300, 309)
-    for old_response in response.history:
-        if old_response.status_code in redirection_codes:
-            raise requests.HTTPError
 
 
 def create_parser():
