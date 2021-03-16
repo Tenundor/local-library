@@ -8,23 +8,19 @@ from pathvalidate import sanitize_filename
 import requests
 
 
-def find_filename_in_url(file_url):
-    path = Path(urlsplit(file_url).path)
-    return unquote(path.name)
-
-
 def parse_book_page(page, baseurl='https://tululu.org/'):
     soup = BeautifulSoup(page, 'lxml')
     title_author_tag = soup.find('td', class_='ow_px_td').find('h1')
     title, author = title_author_tag.text.split('::')
     relative_img_url = soup.find('div', class_='bookimage').find('img')['src']
+    img_path = Path(urlsplit(relative_img_url).path)
     comments_tags = soup.find_all('div', class_='texts')
     genres_tags = soup.find('span', class_='d_book').find_all('a')
     return {
         'title': title.strip(),
         'author': author.strip(),
         'img_url': urljoin(baseurl, relative_img_url),
-        'img_filename': find_filename_in_url(relative_img_url),
+        'img_filename': unquote(img_path.name),
         'comments': [comment.find('span').text for comment in comments_tags],
         'genres': [genre.text for genre in genres_tags],
     }
