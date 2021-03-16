@@ -9,9 +9,8 @@ import requests
 
 
 def find_filename_in_url(file_url):
-    path = urlsplit(file_url)[2]
-    filename_start_index = path.rindex('/') + 1
-    return unquote(path[filename_start_index:])
+    path = Path(urlsplit(file_url).path)
+    return unquote(path.name)
 
 
 def parse_book_page(page, baseurl='https://tululu.org/'):
